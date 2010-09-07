@@ -171,9 +171,7 @@ def Series(sender, ids, mark, title, art):
                     art = art,
                     thumb = seria.thumb
                     ),
-                ids = seria.ids
-            )
-        )
+                ids = seria.ids))
     return mc
 
 def Videos(sender, ids):
@@ -183,12 +181,12 @@ def Videos(sender, ids):
     return Redirect(v.url)
 
 def Serials(sender, favs = False):
-    dir = MediaContainer(viewGroup="InfoList")
+    mc = MediaContainer(viewGroup="InfoList")
     serials = FetchSeriesList(favs)
     if serials is None:
         return MessageContainer("Error", "Can't do that.\nCheck preferences or refill your ballance!")
     for item in serials:
-        dir.Append(
+        mc.Append(
             Function(
                 DirectoryItem(
                     Series,
@@ -201,7 +199,7 @@ def Serials(sender, favs = False):
                 mark = item.mark,
                 title = SITE + item.title,
                 art = SITE + item.art))
-    return dir
+    return mc
 
 def VideoMainMenu():
     dir = MediaContainer(viewGroup="InfoList")
