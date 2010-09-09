@@ -134,6 +134,7 @@ def FetchSeriesList(favs=False):
         serial = Serial(item)
         serieslist.append(serial)
         sv[serial.ids] = serial
+    serieslist.sort(lambda x,y: -1 if x.title < y.title else 1)
     if favs:
         for item in xml.xpath('//document/favorites/item/series'):
             favorites.append(sv[item.text])
