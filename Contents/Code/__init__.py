@@ -217,6 +217,8 @@ def VideoMainMenu():
                               subtitle = 'List of your favorite shows',
                               thumb=R(ICON)),
                 favs = True))
+    else:
+        Log('No auth!')
     dir.Append(
         PrefsItem(
             title="Preferences",
