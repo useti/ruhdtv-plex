@@ -1,4 +1,4 @@
-# Writen by me, yeah! Grigory Baunov <thebobuk@ya.ru>
+# Writen by me, yeah! Grigory Bakunov <thebobuk@ya.ru>
 # Please leave my copyrights here cause as you can notice
 # "Copyright" always means "absolutely right copying".
 # Illegal copying of this code prohibited by real patsan's law!
