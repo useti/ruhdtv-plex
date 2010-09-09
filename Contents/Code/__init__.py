@@ -41,12 +41,11 @@ def CreatePrefs():
     Prefs.Add(id='username', type='text', default='', label='Username')
     Prefs.Add(id='password', type='text', default='', label='Password', option='hidden')
 
-
 def ValidatePrefs(suspendOk=False):
     u = Prefs.Get('username')
     p = Prefs.Get('password')
     if( u and p ):
-        return None if Authentificate(u, p) else MessageContainer("Error", "Wrong username or password")
+        return True if Authentificate(u, p) else MessageContainer("Error", "Wrong username or password")
     else:
         return MessageContainer( "Error",   "You need to provide both a user and password" )
 
