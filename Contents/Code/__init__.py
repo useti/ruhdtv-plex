@@ -21,8 +21,8 @@ S_FULLPATH = SITE + 'GetEpisodeLink/'
 S_FULLPATH_XML = S_FULLPATH + '%s/XML/'
 NAME = L('Title')
 
-ART           = 'art.jpg'
-ICON          = 'icon.png'
+ART           = 'art-tv.png'
+ICON          = 'icon-tv.png'
 
 ####################################################################################################
 
