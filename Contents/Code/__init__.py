@@ -83,7 +83,7 @@ def noHTML(text):
                .replace('&quot;', '"')\
                .replace('&hellip;', '…')\
                .replace('<span style="font-weight: bold;">', '«')\
-               .replace('</span>', '»')
+               .replace('</span>', '»') if text else text
                
 
 def _ig(xml, tid, default = None):
