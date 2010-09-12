@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Writen by me, yeah! Grigory Bakunov <thebobuk@ya.ru>
 # Please leave my copyrights here cause as you can notice
 # "Copyright" always means "absolutely right copying".
@@ -74,6 +75,17 @@ def FetchXML(url):
         xml = XML.ElementFromURL(url)
     return xml
 
+def noHTML(text):
+    return text.replace('<br />','\n').replace('<br/>', '\n')\
+               .replace('&ndash;',u'\u2013')\
+               .replace('&mdash;',u'\u2014')\
+               .replace('&raquo;','»').replace('&laquo;', '«')\
+               .replace('&quot;', '"')\
+               .replace('&hellip;', '…')\
+               .replace('<span style="font-weight: bold;">', '«')\
+               .replace('</span>', '»')
+               
+
 def _ig(xml, tid, default = None):
     try:
         return xml.xpath(tid)[0].text
@@ -94,7 +106,7 @@ class Episode:
         self.mark   = mark
         self.title  = _ig(xml, './title')
         self.etitle = _ig(xml, './etitle')
-        self.info   = _ig(xml, './info')
+        self.info   = noHTML(_ig(xml, './info'))
         self.ids    = _ig(xml, './id_episodes')
         self.snum   = int(_ig(xml, './snum'))
         self.enum   = int(_ig(xml, './enum'))
@@ -111,7 +123,7 @@ class Serial:
     def __init__(self, xml):
         self.title  = _ig(xml, './title')
         self.etitle = _ig(xml, './etitle')
-        self.info   = _ig(xml, './info')
+        self.info   = noHTML( _ig(xml, './info') )
         self.ids    = _ig(xml, './id_series')
         self.mark   = _ig(xml, './mark')
         self.thumb  = _ig(xml, './fpimg')
