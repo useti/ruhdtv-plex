@@ -154,12 +154,21 @@ def FetchSeriesList(favs=False):
         return favorites
     return serieslist
 
+def FetchRSSEpisodesList():
+    rsslist = []
+    xml = RSS.FeedFromURL(S_RSS_PATH)
+    if xml is None:
+        return None
+    for item in xml.entries:
+        ids = item.link.split('/')[4]
+        rsslist.append((ids, item.title))
+    return rsslist
+    
 def FetchEpisodesList(ids, mark):
     episodeslist = []
     xml = FetchXML(S_EPISODES_XML % ids)
     if xml is None:
         return None
-
     for item in xml.xpath('/document/series/season/item'):
         episodeslist.append(Episode(mark, item))
     return episodeslist
@@ -214,6 +223,22 @@ def Serials(sender, favs = False):
                 art = SITE + item.art))
     return mc
 
+def Updates(sender):
+    mc = MediaContainer()
+    series = FetchRSSEpisodesList()
+    if series is None:
+        return MessageContainer("Error", "Can't do that.\nCheck preferences or refill your ballance!")
+    for (ids, title) in series:
+        mc.Append(
+            Function(
+                VideoItem(
+                    Videos,
+                    title,
+                    ),
+                ids = ids))
+    return mc
+    
+
 def VideoMainMenu():
     dir = MediaContainer(viewGroup="InfoList")
     if Authentificate(Prefs.Get('username'), Prefs.Get('password')):
@@ -231,6 +256,12 @@ def VideoMainMenu():
                               subtitle = 'List of your favorite shows',
                               thumb=R(ICON)),
                 favs = True))
+        dir.Append(Function(
+                DirectoryItem(Updates,
+                              title = "Updates",
+                              subtitle = 'List of new or updated series',
+                              thumb = R(ICON)
+                )))
     else:
         Log('No auth!')
     dir.Append(
