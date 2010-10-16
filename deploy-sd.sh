@@ -1,5 +1,6 @@
 #!/bin/sh
 B="$HOME/Library/Application Support/Plex Media Server/Plug-ins/RuSDtv.bundle"
+test -d "$B" || B="$HOME/Library/Application Support/Plex Media Server/Plug-ins/RuSD.tv.bundle"
 I="$B/Contents"
 mkdir -p "$B/"
 cp -r "Contents" "$B/"
