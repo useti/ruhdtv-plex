@@ -175,7 +175,7 @@ def Series(sender, ids, mark, title, art):
     series = FetchEpisodesList(ids, mark)
     if series is None:
         return MessageContainer("Error", "Can't do that.\nCheck preferences or refill your ballance!")
-    for seria in FetchEpisodesList(ids, mark):
+    for seria in series:
         mc.Append(
             Function(
                 VideoItem(
