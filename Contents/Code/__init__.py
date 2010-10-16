@@ -20,6 +20,7 @@ S_EPISODES = SITE +"ShowEpisodes/"
 S_EPISODES_XML = S_EPISODES + "%s/XML/"
 S_FULLPATH = SITE + 'GetEpisodeLink/'
 S_FULLPATH_XML = S_FULLPATH + '%s/XML/'
+S_RSS_PATH = SITE + "ShowRSS/"
 NAME = L('Title')
 
 ART           = 'art-tv.png'
