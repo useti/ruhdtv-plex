@@ -11,16 +11,17 @@ import re
 from copy import deepcopy
 ####################################################################################################
 
-VIDEO_PREFIX = "/video/ruhdtv"
+VIDEO_PREFIX = "/video/hdouttv"
 
-SITE = "http://ruhd.tv/"
-S_SERIES = SITE + "ShowSeries/"
-S_SERIES_XML = S_SERIES + "XML/"
-S_EPISODES = SITE +"ShowEpisodes/"
+SITE = "http://hdout.tv/"
+S_SERIES = SITE + "List/"
+S_SERIES_XML = S_SERIES + "all/XML/"
+S_MY_SERIES_XML = S_SERIES + "my/XML/"
+S_EPISODES = SITE +"Series/"
 S_EPISODES_XML = S_EPISODES + "%s/XML/"
-S_FULLPATH = SITE + 'GetEpisodeLink/'
+S_FULLPATH = SITE + 'EpisodeLink/'
 S_FULLPATH_XML = S_FULLPATH + '%s/XML/'
-S_RSS_PATH = SITE + "ShowRSS/"
+S_RSS_PATH = SITE + "RSS/"
 NAME = L('Title')
 
 ART           = 'art-tv.png'
@@ -56,7 +57,7 @@ def Authentificate(user, passwd):
     if __authed:
         return True
     req = HTTP.Request(SITE, values={"login": user, "password": passwd})
-    if "<form" in str(req):
+    if "search" not in str(req):
         Log("Oooops, wrong pass or no creds")
         return False
     Log("Ok, i'm in!")
@@ -99,14 +100,18 @@ class Video:
         self.ids = ids
         self.snd = [_ig(xml,'./defsnd'), _ig(xml, './addsnd')]
         self.sub = [_ig(xml,'./sub1'),   _ig(xml,'./sub2')   ]
-        self.vurl = _ig(xml, './vurl')
-        self.url = SITE + 'content/' + self.vurl
+        self.url = _ig(xml, './videourl')
 
 class Episode:
     def __init__(self, mark, xml):
         self.mark   = mark
         self.title  = _ig(xml, './title')
         self.etitle = _ig(xml, './etitle')
+        if not self.title or len(self.title) < 1:
+            self.title = self.etitle
+        self.type   = _ig(xml, './type')
+        self.server   = _ig(xml, './server')
+        
         self.info   = noHTML(_ig(xml, './info'))
         self.ids    = _ig(xml, './id_episodes')
         self.snum   = int(_ig(xml, './snum'))
@@ -124,11 +129,21 @@ class Serial:
     def __init__(self, xml):
         self.title  = _ig(xml, './title')
         self.etitle = _ig(xml, './etitle')
+        if not self.title or len(self.title) < 1:
+            self.title = self.etitle
         self.info   = noHTML( _ig(xml, './info') )
         self.ids    = _ig(xml, './id_series')
         self.mark   = _ig(xml, './mark')
-        self.thumb  = _ig(xml, './fpimg')
-        self.art    = _ig(xml, './pimg')
+        self.type   = _ig(xml, './type')
+        if self.type == '1':
+            self.thumb  = SITE + "static/c/sd/s/" + self.mark + '.jpg'
+            self.art    = SITE + "static/c/sd/b/" + self.mark + '.jpg'
+            self.title  = self.title + ' [SD]'
+        else:
+            self.thumb  = SITE + "static/c/hd/s/" + self.mark + '.jpg'
+            self.art    = SITE + "static/c/hd/b/" + self.mark + '.jpg'
+            self.title  = self.title + ' [HD]'
+            
 
     def __repr__(self):
         return '%s/%s (%s/%s)' % ( self.title, self.etitle, self.ids, self.mark)
@@ -150,7 +165,10 @@ def FetchSeriesList(favs=False):
     serieslist.sort(lambda x,y: -1 if x.title < y.title else 1)
     if favs:
         for item in xml.xpath('//document/favorites/item/series'):
-            favorites.append(sv[item.text])
+            try:
+                favorites.append(sv[item.text])
+            except:
+                Log('No items for Serial ' + item.text)
         return favorites
     return serieslist
 
