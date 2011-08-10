@@ -111,13 +111,16 @@ class Episode:
             self.title = self.etitle
         self.type   = _ig(xml, './type')
         self.server   = _ig(xml, './server')
-        
         self.info   = noHTML(_ig(xml, './info'))
         self.ids    = _ig(xml, './id_episodes')
         self.snum   = int(_ig(xml, './snum'))
         self.enum   = int(_ig(xml, './enum'))
         self.vnum   = _ig(xml, './vnum')
-        self.thumb  = SITE + 'content/%s/sc/%.2d-%.2d' % (mark, self.snum, self.enum)
+        if self.type == 1:
+            self.thumb = SITE + "v/1/sd/%s/%02d-%02d.jpg" % (self.mark, self.snum, self.enum)
+        else:
+            self.thumb = SITE + "v/1/hd/%s/sc/%02d-%02d.jpg" % (self.mark, self.snum, self.enum)
+
 
     def __repr__(self):
         return '%s > %s s%de%s (%s)' % ( self.mark, self.title, self.snum, self.vnum, self.ids)
@@ -143,7 +146,6 @@ class Serial:
             self.thumb  = SITE + "static/c/hd/s/" + self.mark + '.jpg'
             self.art    = SITE + "static/c/hd/b/" + self.mark + '.jpg'
             self.title  = self.title + ' [HD]'
-            
 
     def __repr__(self):
         return '%s/%s (%s/%s)' % ( self.title, self.etitle, self.ids, self.mark)
@@ -233,8 +235,8 @@ def Serials(sender, favs = False):
                     title = item.title,
                     subtitle = item.etitle,
                     summary = item.info,
-                    thumb = SITE + item.thumb,
-                    art = SITE + item.art),
+                    thumb = item.thumb,
+                    art = item.art),
                 ids  = item.ids,
                 mark = item.mark,
                 title = SITE + item.title,
