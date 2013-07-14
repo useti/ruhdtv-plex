@@ -4,12 +4,11 @@
 # "Copyright" always means "absolutely right copying".
 # Illegal copying of this code prohibited by real patsan's law!
 
-from PMS import *
-from PMS.Objects import *
-from PMS.Shortcuts import *
 import re
 from copy import deepcopy
 ####################################################################################################
+
+
 
 VIDEO_PREFIX = "/video/hdouttv"
 
@@ -29,7 +28,7 @@ ICON          = 'icon-tv.png'
 
 ####################################################################################################
 
-__authed = False
+authed = False
 
 def Start():
     Plugin.AddPrefixHandler(VIDEO_PREFIX, VideoMainMenu, L('VideoTitle'), ICON, ART)
@@ -45,23 +44,23 @@ def CreatePrefs():
     Prefs.Add(id='password', type='text', default='', label='Password', option='hidden')
 
 def ValidatePrefs(suspendOk=False):
-    u = Prefs.Get('username')
-    p = Prefs.Get('password')
+    u = Prefs['username']
+    p = Prefs['password']
     if( u and p ):
         return True if Authentificate(u, p) else MessageContainer("Error", "Wrong username or password")
     else:
         return MessageContainer( "Error",   "You need to provide both a user and password" )
 
 def Authentificate(user, passwd):
-    global __authed
-    if __authed:
+    global authed
+    if authed:
         return True
     req = HTTP.Request(SITE, values={"login": user, "password": passwd})
     if "search" not in str(req):
         Log("Oooops, wrong pass or no creds")
         return False
     Log("Ok, i'm in!")
-    __authed = True
+    authed = True
     return True
 
 def FetchXML(url):
@@ -71,7 +70,7 @@ def FetchXML(url):
         Log('Need auth or bad xml')
         xml = None
     if xml is None or str(xml.tag) != 'document':
-        f = Authentificate(Prefs.Get('username'), Prefs.Get('password'))
+        f = Authentificate(Prefs['username'], Prefs['password'])
         if not f:
             return None
         xml = XML.ElementFromURL(url)
@@ -88,7 +87,7 @@ def noHTML(text):
                .replace('</span>', '»') if text else text
                
 
-def _ig(xml, tid, default = None):
+def m_ig(xml, tid, default = None):
     try:
         return xml.xpath(tid)[0].text
     except:
@@ -98,24 +97,24 @@ class Video:
     def __init__(self, ids, xml):
         xml = xml.xpath('//item')[0]
         self.ids = ids
-        self.snd = [_ig(xml,'./defsnd'), _ig(xml, './addsnd')]
-        self.sub = [_ig(xml,'./sub1'),   _ig(xml,'./sub2')   ]
-        self.url = _ig(xml, './videourl')
+        self.snd = [m_ig(xml,'./defsnd'), m_ig(xml, './addsnd')]
+        self.sub = [m_ig(xml,'./sub1'),   m_ig(xml,'./sub2')   ]
+        self.url = m_ig(xml, './videourl')
 
 class Episode:
     def __init__(self, mark, xml):
         self.mark   = mark
-        self.title  = _ig(xml, './title')
-        self.etitle = _ig(xml, './etitle')
+        self.title  = m_ig(xml, './title')
+        self.etitle = m_ig(xml, './etitle')
         if not self.title or len(self.title) < 1:
             self.title = self.etitle
-        self.type   = _ig(xml, './type')
-        self.server   = _ig(xml, './server')
-        self.info   = noHTML(_ig(xml, './info'))
-        self.ids    = _ig(xml, './id_episodes')
-        self.snum   = int(_ig(xml, './snum'))
-        self.enum   = int(_ig(xml, './enum'))
-        self.vnum   = _ig(xml, './vnum')
+        self.type   = m_ig(xml, './type')
+        self.server   = m_ig(xml, './server')
+        self.info   = noHTML(m_ig(xml, './info'))
+        self.ids    = m_ig(xml, './id_episodes')
+        self.snum   = int(m_ig(xml, './snum'))
+        self.enum   = int(m_ig(xml, './enum'))
+        self.vnum   = m_ig(xml, './vnum')
         if self.type == 1:
             self.thumb = SITE + "v/1/sd/%s/%02d-%02d.jpg" % (self.mark, self.snum, self.enum)
         else:
@@ -130,14 +129,14 @@ class Episode:
 
 class Serial:
     def __init__(self, xml):
-        self.title  = _ig(xml, './title')
-        self.etitle = _ig(xml, './etitle')
+        self.title  = m_ig(xml, './title')
+        self.etitle = m_ig(xml, './etitle')
         if not self.title or len(self.title) < 1:
             self.title = self.etitle
-        self.info   = noHTML( _ig(xml, './info') )
-        self.ids    = _ig(xml, './id_series')
-        self.mark   = _ig(xml, './mark')
-        self.type   = _ig(xml, './type')
+        self.info   = noHTML( m_ig(xml, './info') )
+        self.ids    = m_ig(xml, './id_series')
+        self.mark   = m_ig(xml, './mark')
+        self.type   = m_ig(xml, './type')
         if self.type == '1':
             self.thumb  = SITE + "static/c/sd/s/" + self.mark + '.jpg'
             self.art    = SITE + "static/c/sd/b/" + self.mark + '.jpg'
@@ -218,9 +217,14 @@ def Series(sender, ids, mark, title, art):
 
 def Videos(sender, ids):
     v = FetchVideoItem(ids)
+    Log('Video: ')
     if v is None:
         return MessageContainer("Error", "Can't do that.\nCheck preferences or refill your ballance!")
-    return Redirect(v.url)
+    Log(v.url)
+    parts = [ PartObject(key = v.url) ]
+    # return MediaObject(parts = parts)
+    # PartObject(Redirect( url = v.url))
+    return Redirect( url = v.url)
 
 def Serials(sender, favs = False):
     mc = MediaContainer(viewGroup="InfoList")
@@ -261,7 +265,7 @@ def Updates(sender):
 
 def VideoMainMenu():
     dir = MediaContainer(viewGroup="InfoList")
-    if Authentificate(Prefs.Get('username'), Prefs.Get('password')):
+    if Authentificate(Prefs['username'], Prefs['password']):
         dir.Append(
             Function(
                 DirectoryItem(Serials,
