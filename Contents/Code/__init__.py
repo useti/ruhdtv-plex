@@ -221,10 +221,32 @@ def Videos(sender, ids):
     if v is None:
         return MessageContainer("Error", "Can't do that.\nCheck preferences or refill your ballance!")
     Log(v.url)
-    parts = [ PartObject(key = v.url) ]
-    # return MediaObject(parts = parts)
+    #parts = [ PartObject(key = v.url , file = Redirect ( url = v.url)) ]
+
+    #return MediaObject(parts = parts)
     # PartObject(Redirect( url = v.url))
-    return Redirect( url = v.url)
+    #return Redirect( url = v.url)
+    return MediaObject(
+        parts = [
+            PartObject(
+                key = Callback(PlayVideo, url=v.url, bitrate="600")
+                #key = v.url
+            )
+        ],
+        bitrate = int(600),
+        container = Container.MP4,
+        video_resolution = "480",
+        video_codec = VideoCodec.H264,
+        audio_codec = AudioCodec.AAC,
+        audio_channels = 2,
+        optimized_for_streaming = True
+    )
+
+def PlayVideo(url, bitrate):
+    Log('Play: ')
+    #return IndirectResponse(VideoClipObject, key='{ "url" : "https://dl.dropboxusercontent.com/u/136904/08-02.mp4" }')
+    return Redirect( url = "https://dl.dropboxusercontent.com/u/136904/08-02.mp4")
+
 
 def Serials(sender, favs = False):
     mc = MediaContainer(viewGroup="InfoList")
