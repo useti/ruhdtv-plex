@@ -1,12 +1,12 @@
 [
     {
-         "id": "username",
+         "id": "hdout_username",
          "type": "text",
          "label": "Username",
          "default": "" 
     },
     {
-         "id": "password",
+         "id": "hdout_password",
          "type": "text",
          "label": "Password",
          "default": "",

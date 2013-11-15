@@ -39,13 +39,13 @@ def Start():
     MediaContainer.title1 = NAME
     DirectoryItem.thumb = R(ICON)
 
-def CreatePrefs():
-    Prefs.Add(id='username', type='text', default='', label='Username')
-    Prefs.Add(id='password', type='text', default='', label='Password', option='hidden')
+#def CreatePrefs():
+#    Prefs.Add(id='username', type='text', default='', label='Username')
+#    Prefs.Add(id='password', type='text', default='', label='Password', option='hidden')
 
 def ValidatePrefs(suspendOk=False):
-    u = Prefs['username']
-    p = Prefs['password']
+    u = Prefs['hdout_username']
+    p = Prefs['hdout_password']
     if( u and p ):
         return True if Authentificate(u, p) else MessageContainer("Error", "Wrong username or password")
     else:
@@ -70,7 +70,7 @@ def FetchXML(url):
         Log('Need auth or bad xml')
         xml = None
     if xml is None or str(xml.tag) != 'document':
-        f = Authentificate(Prefs['username'], Prefs['password'])
+        f = Authentificate(Prefs['hdout_username'], Prefs['hdout_password'])
         if not f:
             return None
         xml = XML.ElementFromURL(url)
@@ -100,6 +100,10 @@ class Video:
         self.snd = [m_ig(xml,'./defsnd'), m_ig(xml, './addsnd')]
         self.sub = [m_ig(xml,'./sub1'),   m_ig(xml,'./sub2')   ]
         self.url = m_ig(xml, './videourl')
+        self.scurl = m_ig(xml, './scurl')
+        self.etitle = m_ig(xml, './etitle')
+        self.title = m_ig(xml, './seriesitem/title')
+        self.tmark = m_ig(xml, './tmark')
 
 class Episode:
     def __init__(self, mark, xml):
@@ -215,6 +219,14 @@ def Series(sender, ids, mark, title, art):
                 ids = seria.ids))
     return mc
 
+def GetThumb(url):
+
+  try:
+    data = HTTP.Request(url, cacheTime=CACHE_1MONTH).content
+    return DataObject(data, 'image/jpeg')
+  except:
+    return Redirect(R(ICON))
+
 def Videos(sender, ids):
     v = FetchVideoItem(ids)
     Log('Video: ')
@@ -223,29 +235,78 @@ def Videos(sender, ids):
     Log(v.url)
     #parts = [ PartObject(key = v.url , file = Redirect ( url = v.url)) ]
 
+    return VideoClipObject(
+        url = S_FULLPATH_XML % ids,
+        title = v.etitle,
+        summary = '',
+        thumb = Callback(GetThumb, url=v.scurl),
+        duration = None,
+        originally_available_at = Datetime.ParseDate(v.tmark)
+    )
+
     #return MediaObject(parts = parts)
     # PartObject(Redirect( url = v.url))
     #return Redirect( url = v.url)
-    return MediaObject(
-        parts = [
-            PartObject(
-                key = Callback(PlayVideo, url=v.url, bitrate="600")
-                #key = v.url
-            )
-        ],
-        bitrate = int(600),
-        container = Container.MP4,
-        video_resolution = "480",
-        video_codec = VideoCodec.H264,
-        audio_codec = AudioCodec.AAC,
-        audio_channels = 2,
-        optimized_for_streaming = True
-    )
+    #return MediaObject(
+    #    parts = [
+    #        PartObject(
+    #            key = Callback(PlayVideo, url=v.url, bitrate="600")
+    #            #key = v.url
+    #        )
+    #    ],
+    #    bitrate = int(600),
+    #    container = Container.MP4,
+    #    video_resolution = "480",
+    #    video_codec = VideoCodec.H264,
+    #    audio_codec = AudioCodec.AAC,
+    #    audio_channels = 2,
+    #    optimized_for_streaming = True
+    #)
 
+    #return EpisodeObject(
+    #    key = Callback(BuildEpisode, v = v),
+    #    rating_key = v.etitle,
+    #    title = v.etitle,
+    #    #items = [
+    #    #    MediaObject(
+    #    #        parts = [
+    #    #            PartObject(
+    #    #                key = Callback(PlayVideo, url=v.url, bitrate="600")
+    #    #                #key = v.url
+    #    #            )
+    #    #        ],
+    #    #        bitrate = int(600),
+    #    #        container = Container.MP4,
+    #    #        video_resolution = "480",
+    #    #        video_codec = VideoCodec.H264,
+    #    #        audio_codec = AudioCodec.AAC,
+    #    #        audio_channels = 2,
+    #    #        optimized_for_streaming = True
+    #    #    )
+    #    #]
+    #)
+
+#def BuildEpisode(v)
+#    return MediaObject(
+#        parts = [
+#            PartObject(
+#                key = Callback(PlayVideo, url=v.url, bitrate="600")
+#                #key = v.url
+#            )
+#        ],
+#        bitrate = int(600),
+#        container = Container.MP4,
+#        video_resolution = "480",
+#        video_codec = VideoCodec.H264,
+#        audio_codec = AudioCodec.AAC,
+#        audio_channels = 2,
+#        optimized_for_streaming = True)
+
+#@indirect
 def PlayVideo(url, bitrate):
     Log('Play: ')
-    #return IndirectResponse(VideoClipObject, key='{ "url" : "https://dl.dropboxusercontent.com/u/136904/08-02.mp4" }')
-    return Redirect( url = "https://dl.dropboxusercontent.com/u/136904/08-02.mp4")
+    return IndirectResponse(VideoClipObject, key='{ "url" : "https://dl.dropboxusercontent.com/u/136904/08-02.mp4" }')
+    #return Redirect( url = url)
 
 
 def Serials(sender, favs = False):
@@ -284,10 +345,10 @@ def Updates(sender):
                 ids = ids))
     return mc
     
-
+@handler(VIDEO_PREFIX, NAME, art = ART, thumb = ICON)
 def VideoMainMenu():
     dir = MediaContainer(viewGroup="InfoList")
-    if Authentificate(Prefs['username'], Prefs['password']):
+    if Authentificate(Prefs['hdout_username'], Prefs['hdout_password']):
         dir.Append(
             Function(
                 DirectoryItem(Serials,
