@@ -11,7 +11,6 @@ from copy import deepcopy
 
 
 VIDEO_PREFIX = "/video/hdouttv"
-
 SITE = "http://hdout.tv/"
 S_SERIES = SITE + "List/"
 S_SERIES_XML = S_SERIES + "all/XML/"
@@ -38,10 +37,6 @@ def Start():
     MediaContainer.art = R(ART)
     MediaContainer.title1 = NAME
     DirectoryItem.thumb = R(ICON)
-
-#def CreatePrefs():
-#    Prefs.Add(id='username', type='text', default='', label='Username')
-#    Prefs.Add(id='password', type='text', default='', label='Password', option='hidden')
 
 def ValidatePrefs(suspendOk=False):
     u = Prefs['hdout_username']
@@ -233,7 +228,6 @@ def Videos(sender, ids):
     if v is None:
         return MessageContainer("Error", "Can't do that.\nCheck preferences or refill your ballance!")
     Log(v.url)
-    #parts = [ PartObject(key = v.url , file = Redirect ( url = v.url)) ]
 
     return VideoClipObject(
         url = S_FULLPATH_XML % ids,
@@ -243,71 +237,6 @@ def Videos(sender, ids):
         duration = None,
         originally_available_at = Datetime.ParseDate(v.tmark)
     )
-
-    #return MediaObject(parts = parts)
-    # PartObject(Redirect( url = v.url))
-    #return Redirect( url = v.url)
-    #return MediaObject(
-    #    parts = [
-    #        PartObject(
-    #            key = Callback(PlayVideo, url=v.url, bitrate="600")
-    #            #key = v.url
-    #        )
-    #    ],
-    #    bitrate = int(600),
-    #    container = Container.MP4,
-    #    video_resolution = "480",
-    #    video_codec = VideoCodec.H264,
-    #    audio_codec = AudioCodec.AAC,
-    #    audio_channels = 2,
-    #    optimized_for_streaming = True
-    #)
-
-    #return EpisodeObject(
-    #    key = Callback(BuildEpisode, v = v),
-    #    rating_key = v.etitle,
-    #    title = v.etitle,
-    #    #items = [
-    #    #    MediaObject(
-    #    #        parts = [
-    #    #            PartObject(
-    #    #                key = Callback(PlayVideo, url=v.url, bitrate="600")
-    #    #                #key = v.url
-    #    #            )
-    #    #        ],
-    #    #        bitrate = int(600),
-    #    #        container = Container.MP4,
-    #    #        video_resolution = "480",
-    #    #        video_codec = VideoCodec.H264,
-    #    #        audio_codec = AudioCodec.AAC,
-    #    #        audio_channels = 2,
-    #    #        optimized_for_streaming = True
-    #    #    )
-    #    #]
-    #)
-
-#def BuildEpisode(v)
-#    return MediaObject(
-#        parts = [
-#            PartObject(
-#                key = Callback(PlayVideo, url=v.url, bitrate="600")
-#                #key = v.url
-#            )
-#        ],
-#        bitrate = int(600),
-#        container = Container.MP4,
-#        video_resolution = "480",
-#        video_codec = VideoCodec.H264,
-#        audio_codec = AudioCodec.AAC,
-#        audio_channels = 2,
-#        optimized_for_streaming = True)
-
-#@indirect
-def PlayVideo(url, bitrate):
-    Log('Play: ')
-    return IndirectResponse(VideoClipObject, key='{ "url" : "https://dl.dropboxusercontent.com/u/136904/08-02.mp4" }')
-    #return Redirect( url = url)
-
 
 def Serials(sender, favs = False):
     mc = MediaContainer(viewGroup="InfoList")

@@ -21,8 +21,6 @@ def m_ig(xml, tid, default = None):
 
 def Authentificate(user, passwd):
     global authed
-    if authed:
-        return True
     req = HTTP.Request(SITE, values={"login": user, "password": passwd})
     if "search" not in str(req):
         Log("Oooops, wrong pass or no creds")
@@ -34,7 +32,6 @@ def Authentificate(user, passwd):
 class Video:
     def __init__(self, xml):
         xml = xml.xpath('//item')[0]
-        #self.ids = ids
         self.snd = [m_ig(xml,'./defsnd'), m_ig(xml, './addsnd')]
         self.sub = [m_ig(xml,'./sub1'),   m_ig(xml,'./sub2')   ]
         self.url = m_ig(xml, './videourl')
@@ -45,12 +42,15 @@ class Video:
 
 ####################################################################################################
 def FetchXML(url):
+    Log(url)
     try:
         xml = XML.ElementFromURL(url)
     except:
         Log('Need auth or bad xml')
         xml = None
     if xml is None or str(xml.tag) != 'document':
+        login = Prefs['hdout_username']
+        Log('Login %s' % login)
         f = Authentificate(Prefs['hdout_username'], Prefs['hdout_password'])
         if not f:
             return None
@@ -73,6 +73,8 @@ def MetadataObjectForURL(url):
         return None
     v = Video(xml)
 
+    Log('Metadata for %s' % url)
+
     show = v.title
     title = v.etitle
     summary = ""
@@ -85,16 +87,11 @@ def MetadataObjectForURL(url):
 
 ####################################################################################################
 def MediaObjectsForURL(url):
-
-    xml = FetchXML(url)
-    if xml is None:
-        return None
-    v = Video(xml)
-
+    Log('Media object for %s' %  url)
     return [ MediaObject(
          parts = [
               PartObject(
-                   key = Callback(PlayVideo, url=v.url, bitrate="600")
+                   key = Callback(PlayVideo, url=url, bitrate="600")
                    )
          ],
          bitrate = int(600),
@@ -107,8 +104,11 @@ def MediaObjectsForURL(url):
     ) ]
 
 ####################################################################################################
-#@indirect
-def PlayVideo(url, fmt):
+def PlayVideo(url, bitrate=600):
     Log("play")
-    return Redirect( url = url)
-	#return IndirectResponse(VideoClipObject, key=url)
+    xml = FetchXML(url)
+    if xml is None:
+        return None
+    v = Video(xml)
+    Log('Play %s' % v.url)
+    return Redirect( url = v.url)
