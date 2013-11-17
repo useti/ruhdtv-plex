@@ -48,8 +48,8 @@ def ValidatePrefs(suspendOk=False):
 
 def Authentificate(user, passwd):
     global authed
-    if authed:
-        return True
+    #if authed:
+    #    return True
     req = HTTP.Request(SITE, values={"login": user, "password": passwd})
     if "search" not in str(req):
         Log("Oooops, wrong pass or no creds")

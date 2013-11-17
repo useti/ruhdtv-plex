@@ -104,6 +104,7 @@ def MediaObjectsForURL(url):
     ) ]
 
 ####################################################################################################
+@indirect
 def PlayVideo(url, bitrate=600):
     Log("play")
     xml = FetchXML(url)
@@ -111,4 +112,5 @@ def PlayVideo(url, bitrate=600):
         return None
     v = Video(xml)
     Log('Play %s' % v.url)
-    return Redirect( url = v.url)
+    return IndirectResponse(VideoClipObject, key=v.url)
+    #return Redirect( url = v.url)
